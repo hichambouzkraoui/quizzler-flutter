@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:quizzler/Quiz.dart';
+import 'package:rflutter_alert/rflutter_alert.dart';
 
 void main() => runApp(Quizzler());
 
@@ -25,6 +27,26 @@ class QuizPage extends StatefulWidget {
 }
 
 class _QuizPageState extends State<QuizPage> {
+  Quiz quiz = new Quiz();
+  void checkAnswer(bool userPickedAnswer) {
+    setState(() {
+      if(!quiz.isFinished()){
+        if(quiz.getAnswer() == userPickedAnswer) {
+          quiz.rightAnswer();
+        } else {
+          quiz.wrongAnswer();
+        }
+        quiz.nextQuestion();
+      } else {
+        Alert(
+          context: context,
+          title: 'Finished!',
+          desc: 'You\'ve reached the end of the quiz.',
+        ).show();
+        quiz.reset();
+      }
+    });
+  }
   @override
   Widget build(BuildContext context) {
     return Column(
@@ -37,7 +59,7 @@ class _QuizPageState extends State<QuizPage> {
             padding: EdgeInsets.all(10.0),
             child: Center(
               child: Text(
-                'This is where the question text will go.',
+                quiz.getQuestion(),
                 textAlign: TextAlign.center,
                 style: TextStyle(
                   fontSize: 25.0,
@@ -50,9 +72,7 @@ class _QuizPageState extends State<QuizPage> {
         Expanded(
           child: Padding(
             padding: EdgeInsets.all(15.0),
-            child: FlatButton(
-              textColor: Colors.white,
-              color: Colors.green,
+            child: TextButton(
               child: Text(
                 'True',
                 style: TextStyle(
@@ -60,17 +80,15 @@ class _QuizPageState extends State<QuizPage> {
                   fontSize: 20.0,
                 ),
               ),
-              onPressed: () {
-                //The user picked true.
-              },
+              style: TextButton.styleFrom(backgroundColor: Colors.green),
+              onPressed: () => checkAnswer(true),
             ),
           ),
         ),
         Expanded(
           child: Padding(
             padding: EdgeInsets.all(15.0),
-            child: FlatButton(
-              color: Colors.red,
+            child: TextButton(
               child: Text(
                 'False',
                 style: TextStyle(
@@ -78,20 +96,16 @@ class _QuizPageState extends State<QuizPage> {
                   color: Colors.white,
                 ),
               ),
-              onPressed: () {
-                //The user picked false.
-              },
+              style: TextButton.styleFrom(backgroundColor: Colors.red),
+              onPressed: () => checkAnswer(false),
             ),
           ),
         ),
+        Row(
+          children: quiz.scoreKeeper,
+        )
         //TODO: Add a Row here as your score keeper
       ],
     );
   }
 }
-
-/*
-question1: 'You can lead a cow down stairs but not up stairs.', false,
-question2: 'Approximately one quarter of human bones are in the feet.', true,
-question3: 'A slug\'s blood is green.', true,
-*/
